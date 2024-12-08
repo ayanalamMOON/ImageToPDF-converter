@@ -152,6 +152,7 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
   4. Do ONE of these:
      - Add to system PATH (tech ninja mode 🥷)
      - Drop files in the same folder as your script (lazy mode activated 😎)
+     - If the binaries are not available, compile on you're own (stop complaing and start compiling 🤡)
 
 ## 💡 Pro Tips
 - Wanna add more image formats? Go for it! 
