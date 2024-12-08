@@ -14,6 +14,25 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
 
 **This tool is your new best friend!**
 
+## 🌟 Features
+
+### 🎯 Core Features
+- Convert HEIC images to PDF
+- Support for JPEG and PNG formats
+- Adjustable compression quality
+- Simple, clean GUI interface
+
+### ⚡ Enhanced Usability
+- **Drag & Drop Support**
+  - Drag folders directly into the input field
+  - Drag files for output PDF location
+  - Right-click context menu for quick actions
+
+- **Keyboard Shortcuts**
+  - `Ctrl+O`: Browse input folder
+  - `Ctrl+S`: Choose PDF save location
+  - `Ctrl+Enter`: Start conversion
+
 ## 🛠 Dependencies Installation Guide (aka Skill Acquisition 101) 
 
 ### 🐍 Python Libraries You'll Need
@@ -48,6 +67,14 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
    - Already comes with Python, so no extra install needed! 
    - Free real estate! 🎊
 
+### Additional Dependencies
+5. **tkinterdnd2** 🎯
+   - Enables drag & drop functionality
+   - Install with:
+     ```bash
+     pip install tkinterdnd2
+     ```
+
 ### 🖥️ System Dependencies
 
 #### libheif (The HEIC Whisperer)
@@ -64,4 +91,7 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
 - Wanna add more image formats? Go for it! 
 - Facing dependency issues? That's just a skill issue, my friend! 💪
 - Keep calm and convert on! 🚀
+- Use drag & drop for faster workflow
+- Learn the keyboard shortcuts for maximum efficiency
+- Right-click entries for quick actions
 
