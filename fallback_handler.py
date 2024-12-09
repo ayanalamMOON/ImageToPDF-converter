@@ -1,25 +1,26 @@
-# file: fallback_handler.py
-
 import os
-from PIL import Image
-from fpdf import FPDF
-import requests
+import json
 import time
+import hashlib
 import logging
 from datetime import datetime
 import tempfile
 from functools import wraps
-import json
-import hashlib
+
+import requests
+from PIL import Image
+from fpdf import FPDF
 
 # CloudConvert API key (replace with your actual key)
 CLOUDCONVERT_API_KEY = "your_cloudconvert_api_key"
 
 # Configure logging
-log_dir = "logs"
-os.makedirs(log_dir, exist_ok=True)
+LOG_DIR = "logs"
+os.makedirs(LOG_DIR, exist_ok=True)
 logging.basicConfig(
-    filename=os.path.join(log_dir, f'converter_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'),
+    filename=os.path.join(
+        LOG_DIR, f'converter_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
+    ),
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -86,16 +87,20 @@ def retry_on_failure(max_retries=3, delay=1):
                     return func(*args, **kwargs)
                 except Exception as e:
                     last_exception = e
-                    logging.warning(f"Attempt {attempt + 1} failed: {str(e)}")
+                    logging.warning(
+                        f"Attempt {attempt + 1} failed: {str(e)}"
+                    )
                     time.sleep(delay * (attempt + 1))
-            logging.error(f"All {max_retries} attempts failed: {str(last_exception)}")
+            logging.error(
+                f"All {max_retries} attempts failed: {str(last_exception)}"
+            )
             raise last_exception
         return wrapper
     return decorator
 
 @retry_on_failure(max_retries=3)
 def convert_heic_to_jpeg_with_cloudconvert(input_path, output_path):
-    """Converts a HEIC file to JPEG using CloudConvert API with retry mechanism."""
+    """Convert a HEIC file to JPEG using CloudConvert API with retry."""
     logging.info(f"Starting CloudConvert conversion for {input_path}")
     try:
         url = "https://api.cloudconvert.com/v2/jobs"
@@ -106,8 +111,15 @@ def convert_heic_to_jpeg_with_cloudconvert(input_path, output_path):
         data = {
             "tasks": {
                 "import-my-file": {"operation": "import/upload"},
-                "convert-my-file": {"operation": "convert", "input": "import-my-file", "output_format": "jpg"},
-                "export-my-file": {"operation": "export/url", "input": "convert-my-file"}
+                "convert-my-file": {
+                    "operation": "convert",
+                    "input": "import-my-file",
+                    "output_format": "jpg"
+                },
+                "export-my-file": {
+                    "operation": "export/url",
+                    "input": "convert-my-file"
+                }
             }
         }
 
@@ -129,13 +141,15 @@ def convert_heic_to_jpeg_with_cloudconvert(input_path, output_path):
             result_response = requests.get(result_url, headers=headers)
             result_response.raise_for_status()
             result_data = result_response.json()
-            if result_data["data"]["status"] == "finished":
-                download_url = result_data["data"]["tasks"]["export-my-file"]["result"]["files"][0]["url"]
+            status = result_data["data"]["status"]
+            if status == "finished":
+                files = result_data["data"]["tasks"]["export-my-file"]["result"]["files"]
+                download_url = files[0]["url"]
                 download_response = requests.get(download_url)
                 with open(output_path, "wb") as f:
                     f.write(download_response.content)
                 break
-            elif result_data["data"]["status"] in {"error", "failed"}:
+            elif status in {"error", "failed"}:
                 raise RuntimeError("CloudConvert job failed.")
             time.sleep(2)
     except Exception as e:
@@ -166,19 +180,21 @@ def check_image_issues(image_path):
 
 class CustomPDF(FPDF):
     """Extended FPDF class with watermark and page numbers."""
-    def __init__(self, orientation='P', unit='mm', format='A4', watermark_text=None):
+    def __init__(
+        self, orientation='P', unit='mm', format='A4',
+        watermark_text=None
+    ):
         super().__init__(orientation=orientation, unit=unit, format=format)
         self.watermark_text = watermark_text
-        
+
     def header(self):
         if self.watermark_text:
             self.set_font('Arial', 'I', 30)
             self.set_text_color(200, 200, 200)  # Light gray
             self.rotate(45)
-            text_width = self.get_string_width(self.watermark_text)
             self.text(40, 80, self.watermark_text)
             self.rotate(0)
-        
+
     def footer(self):
         if self.page_numbers:
             self.set_y(-15)
@@ -196,8 +212,8 @@ def merge_pdfs(pdf_files, output_path):
     merger.close()
 
 def heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, supported_formats, 
-                             progress_bar, status_label, pdf_options=None, recursive=True, min_date=None, 
-                             skip_converted=True, delete_source=False):
+                            progress_bar, status_label, pdf_options=None, recursive=True, min_date=None, 
+                            skip_converted=True, delete_source=False):
     """Enhanced conversion function with new features."""
     conversion_issues = {}
     try:
@@ -213,8 +229,8 @@ def heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, sup
         # Filter already converted files
         if skip_converted:
             files_info = [f for f in files_info 
-                         if f['hash'] not in history or 
-                         history[f['hash']]['timestamp'] < f['modified']]
+                        if f['hash'] not in history or 
+                        history[f['hash']]['timestamp'] < f['modified']] 
 
         if not files_info:
             messagebox.showinfo("Info", "All files are up to date!")
@@ -361,7 +377,7 @@ def heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, sup
         messagebox.showerror("Error", error_msg)
         
         # Generate error report
-        report_path = os.path.join(log_dir, f"error_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt")
+        report_path = os.path.join(LOG_DIR, f"error_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt")
         with open(report_path, 'w') as f:
             f.write(f"Error Report\n\nTimestamp: {datetime.now()}\n")
             f.write(f"Error: {str(e)}\n\n")
