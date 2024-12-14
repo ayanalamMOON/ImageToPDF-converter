@@ -1,10 +1,12 @@
-# file: fallback_handler.py
-
 import os
 from PIL import Image
 from fpdf import FPDF
 import requests
 import time
+from error_handling.error_logger import log_error
+from error_handling.error_reporter import report_error
+from error_handling.retry_mechanism import retry
+from error_handling.preview_issues import preview_issues
 
 # CloudConvert API key (replace with your actual key)
 CLOUDCONVERT_API_KEY = "your_cloudconvert_api_key"
@@ -57,11 +59,11 @@ def convert_heic_to_jpeg_with_cloudconvert(input_path, output_path):
 
 
 def heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, supported_formats, progress_bar, status_label):
-    """Converts HEIC, JPEG, and PNG images to PDF with fallback for HEIC."""
+    """Converts HEIC, JPEG, PNG, BMP, GIF, and TIFF images to PDF with fallback for HEIC."""
     try:
         files = [f for f in os.listdir(input_folder) if f.lower().endswith(supported_formats)]
         if not files:
-            messagebox.showwarning("No Supported Files", "No supported files (HEIC, JPEG, PNG) found in the selected folder!")
+            messagebox.showwarning("No Supported Files", "No supported files (HEIC, JPEG, PNG, BMP, GIF, TIFF) found in the selected folder!")
             return
 
         images = []
@@ -90,7 +92,7 @@ def heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, sup
                     status_label.config(text=f"Falling back to CloudConvert for {filename}")
                     convert_heic_to_jpeg_with_cloudconvert(file_path, output_image_path)
             else:
-                # Handle JPEG and PNG directly
+                # Handle JPEG, PNG, BMP, GIF, and TIFF directly
                 image = Image.open(file_path)
                 if image.mode != "RGB":
                     image = image.convert("RGB")
@@ -113,6 +115,9 @@ def heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, sup
         pdf.output(output_pdf)
         messagebox.showinfo("Success", f"PDF created successfully: {output_pdf}")
     except Exception as e:
+        log_error(str(e))
+        report_error(str(e), "recipient@example.com")
+        preview_issues([str(e)])
         messagebox.showerror("Error", f"An error occurred: {e}")
     finally:
         progress_bar["value"] = 0

@@ -3,6 +3,15 @@ from tkinter import filedialog, messagebox, ttk
 from tkinterdnd2 import DND_FILES, TkinterDnD
 import os
 from fallback_handler import heic_to_pdf_with_fallback
+from error_handling.error_logger import log_error
+from error_handling.error_reporter import report_error
+from error_handling.retry_mechanism import retry
+from error_handling.preview_issues import preview_issues
+from PIL import Image, ImageOps
+import requests
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 class DragDropEntry(tk.Entry):
     """Custom Entry widget with drag and drop support"""
@@ -43,7 +52,7 @@ def browse_file(entry_field):
         entry_field.insert(0, file_path)
 
 
-def start_conversion(input_entry, output_entry, quality_entry, progress_bar, status_label):
+def start_conversion(input_entry, output_entry, quality_entry, progress_bar, status_label, page_size, orientation, margins, email_entry):
     """Start the HEIC, JPEG, and PNG to PDF conversion process."""
     input_folder = input_entry.get()
     output_pdf = output_entry.get()
@@ -58,9 +67,37 @@ def start_conversion(input_entry, output_entry, quality_entry, progress_bar, sta
         return
 
     # Call the function from fallback_handler (File B)
-    supported_formats = (".heic", ".jpeg", ".jpg", ".png")
-    heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, supported_formats, progress_bar, status_label)
+    supported_formats = (".heic", ".jpeg", ".jpg", ".png", ".bmp", ".gif", ".tiff")
+    try:
+        retry(heic_to_pdf_with_fallback, input_folder, output_pdf, compression_quality, supported_formats, progress_bar, status_label, page_size, orientation, margins)
+        send_email_notification(email_entry.get(), "Conversion Successful", f"The conversion of images in {input_folder} to {output_pdf} was successful.")
+    except Exception as e:
+        log_error(str(e))
+        report_error(str(e), "recipient@example.com")
+        preview_issues([str(e)])
+        send_email_notification(email_entry.get(), "Conversion Failed", f"An error occurred during the conversion: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
 
+def send_email_notification(recipient_email, subject, body):
+    sender_email = "your_email@example.com"
+    sender_password = "your_password"
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    msg['Subject'] = subject
+
+    body = MIMEText(body, 'plain')
+    msg.attach(body)
+
+    try:
+        server = smtplib.SMTP('smtp.example.com', 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, recipient_email, msg.as_string())
+        server.quit()
+    except Exception as e:
+        print(f"Failed to send email notification: {e}")
 
 def create_gui():
     """Create the tkinter GUI with drag-drop and shortcuts."""
@@ -77,7 +114,7 @@ def create_gui():
                 browse_file(output_entry)
                 return "break"
             elif event.keysym == 'Return':  # Ctrl+Enter
-                start_conversion(input_entry, output_entry, quality_entry, progress_bar, status_label)
+                start_conversion(input_entry, output_entry, quality_entry, progress_bar, status_label, page_size, orientation, margins, email_entry)
                 return "break"
 
     root.bind('<Key>', handle_shortcuts)
@@ -119,20 +156,43 @@ def create_gui():
     quality_entry.grid(row=2, column=1, padx=10, pady=5, sticky="w")
     quality_entry.insert(0, "85")  # Default value
 
+    # Page size
+    tk.Label(root, text="Page Size (e.g., A4, Letter):").grid(row=3, column=0, padx=10, pady=5, sticky="e")
+    page_size = tk.Entry(root, width=10)
+    page_size.grid(row=3, column=1, padx=10, pady=5, sticky="w")
+    page_size.insert(0, "A4")  # Default value
+
+    # Orientation
+    tk.Label(root, text="Orientation (Portrait/Landscape):").grid(row=4, column=0, padx=10, pady=5, sticky="e")
+    orientation = tk.Entry(root, width=10)
+    orientation.grid(row=4, column=1, padx=10, pady=5, sticky="w")
+    orientation.insert(0, "Portrait")  # Default value
+
+    # Margins
+    tk.Label(root, text="Margins (e.g., 10,10,10,10):").grid(row=5, column=0, padx=10, pady=5, sticky="e")
+    margins = tk.Entry(root, width=20)
+    margins.grid(row=5, column=1, padx=10, pady=5, sticky="w")
+    margins.insert(0, "10,10,10,10")  # Default value
+
+    # Email notification
+    tk.Label(root, text="Email for Notifications:").grid(row=6, column=0, padx=10, pady=5, sticky="e")
+    email_entry = tk.Entry(root, width=50)
+    email_entry.grid(row=6, column=1, padx=10, pady=5, sticky="w")
+
     # Progress bar
     progress_bar = ttk.Progressbar(root, orient="horizontal", length=400, mode="determinate")
-    progress_bar.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
+    progress_bar.grid(row=7, column=0, columnspan=3, padx=10, pady=10)
 
     # Status label
     status_label = tk.Label(root, text="Ready", anchor="w")
-    status_label.grid(row=4, column=0, columnspan=3, padx=10, pady=5)
+    status_label.grid(row=8, column=0, columnspan=3, padx=10, pady=5)
 
     # Update Convert button with shortcut hint
     convert_btn = tk.Button(root, text="Convert (Ctrl+Enter)", 
                           command=lambda: start_conversion(
-                              input_entry, output_entry, quality_entry, progress_bar, status_label
+                              input_entry, output_entry, quality_entry, progress_bar, status_label, page_size, orientation, margins, email_entry
                           ))
-    convert_btn.grid(row=5, column=0, columnspan=3, pady=10)
+    convert_btn.grid(row=9, column=0, columnspan=3, pady=10)
 
     # Keyboard shortcut label
     shortcuts_text = """
@@ -142,7 +202,7 @@ def create_gui():
     Ctrl+Enter: Convert
     """
     shortcuts_label = tk.Label(root, text=shortcuts_text, justify=tk.LEFT, font=("Courier", 8))
-    shortcuts_label.grid(row=6, column=0, columnspan=3, pady=5)
+    shortcuts_label.grid(row=10, column=0, columnspan=3, pady=5)
 
     return root
 

@@ -33,6 +33,18 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
   - `Ctrl+S`: Choose PDF save location
   - `Ctrl+Enter`: Start conversion
 
+### 🚀 New Enhanced Features
+- Batch processing: Select multiple folders for conversion at once
+- Customizable output settings: Set page size, orientation, and margins
+- Image editing tools: Crop, rotate, and resize images before conversion
+- Support for additional formats: BMP, GIF, and TIFF
+- Cloud storage integration: Save output PDF directly to cloud storage services
+- Email notifications: Receive notifications upon successful conversion or errors
+- Command-line interface: Use terminal commands for advanced users
+- Multi-language support: Accessible to a wider audience
+- Dark mode: Reduce eye strain with a dark mode option
+- Detailed progress tracking: Show detailed information about the current file being processed and estimated time remaining
+
 ## 🛠 Dependencies Installation Guide (aka Skill Acquisition 101) 
 
 ### 🐍 Python Libraries You'll Need
@@ -75,6 +87,17 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
      pip install tkinterdnd2
      ```
 
+6. **requests** 🌐
+   - HTTP library for making API requests
+   - Install with:
+     ```bash
+     pip install requests
+     ```
+
+7. **smtplib** 📧
+   - Library for sending email notifications
+   - Comes with Python, no extra install needed!
+
 ### 🖥️ System Dependencies
 
 #### libheif (The HEIC Whisperer)
@@ -94,4 +117,36 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
 - Use drag & drop for faster workflow
 - Learn the keyboard shortcuts for maximum efficiency
 - Right-click entries for quick actions
+
+## 📚 Usage Instructions
+
+### Basic Usage
+1. Open the application.
+2. Drag and drop the input folder containing images into the input field or use `Ctrl+O` to browse.
+3. Drag and drop the output PDF location into the output field or use `Ctrl+S` to save.
+4. Set the compression quality, page size, orientation, and margins as needed.
+5. Enter your email address for notifications (optional).
+6. Click "Convert" or press `Ctrl+Enter` to start the conversion.
+
+### Batch Processing
+1. Select multiple folders for conversion by dragging and dropping them into the input field.
+2. Follow the same steps as basic usage for each folder.
+
+### Image Editing Tools
+1. Before conversion, use the built-in image editing tools to crop, rotate, and resize images as needed.
+
+### Cloud Storage Integration
+1. After conversion, choose to save the output PDF directly to cloud storage services like Google Drive, Dropbox, or OneDrive.
+
+### Command-Line Interface
+1. For advanced users, use terminal commands to perform conversions without the GUI.
+
+### Multi-Language Support
+1. Select your preferred language from the settings menu to make the application accessible in multiple languages.
+
+### Dark Mode
+1. Enable dark mode from the settings menu to reduce eye strain and improve user experience.
+
+### Detailed Progress Tracking
+1. Monitor the progress bar to see detailed information about the current file being processed and estimated time remaining.
 
