@@ -45,6 +45,11 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
 - Dark mode: Reduce eye strain with a dark mode option
 - Detailed progress tracking: Show detailed information about the current file being processed and estimated time remaining
 
+### 🛡️ On-Device Error Reporting System
+- On-device error logs: Collect and store error logs locally on the device
+- Automatic error logging: Log error messages to a local file
+- Analyze error data: Use the local error logs to analyze error data and identify common issues
+
 ## 🛠 Dependencies Installation Guide (aka Skill Acquisition 101) 
 
 ### 🐍 Python Libraries You'll Need
@@ -150,3 +155,6 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
 ### Detailed Progress Tracking
 1. Monitor the progress bar to see detailed information about the current file being processed and estimated time remaining.
 
+### On-Device Error Reporting System
+1. Configure the error log file path in the `error_reporter.py` file.
+2. Error logs will be automatically stored locally on the device for analysis.

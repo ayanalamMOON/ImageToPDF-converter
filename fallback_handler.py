@@ -7,6 +7,7 @@ from error_handling.error_logger import log_error
 from error_handling.error_reporter import report_error
 from error_handling.retry_mechanism import retry
 from error_handling.preview_issues import preview_issues
+from error_reporter import log_error
 
 # CloudConvert API key (replace with your actual key)
 CLOUDCONVERT_API_KEY = "your_cloudconvert_api_key"
@@ -55,6 +56,7 @@ def convert_heic_to_jpeg_with_cloudconvert(input_path, output_path):
                 raise RuntimeError("CloudConvert job failed.")
             time.sleep(2)
     except Exception as e:
+        log_error(str(e))
         raise RuntimeError(f"CloudConvert API error: {e}")
 
 
@@ -118,6 +120,7 @@ def heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, sup
         log_error(str(e))
         report_error(str(e), "recipient@example.com")
         preview_issues([str(e)])
+        log_error(str(e))
         messagebox.showerror("Error", f"An error occurred: {e}")
     finally:
         progress_bar["value"] = 0
