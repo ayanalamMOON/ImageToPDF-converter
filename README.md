@@ -158,3 +158,7 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
 ### On-Device Error Reporting System
 1. Configure the error log file path in the `error_reporter.py` file.
 2. Error logs will be automatically stored locally on the device for analysis.
+3. Use the centralized system to analyze error data and identify common issues.
+4. Utilize different logging levels (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL) to categorize the severity of errors and provide more granular information.
+5. Include stack traces when logging exceptions to provide more detailed information about where the error occurred.
+6. Regularly review the error logs to identify patterns and recurring issues, and take corrective actions to address them.

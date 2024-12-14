@@ -12,7 +12,7 @@ import requests
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from error_reporter import log_error
+from error_reporter import log_error, send_error_log_to_centralized_system
 
 class DragDropEntry(tk.Entry):
     """Custom Entry widget with drag and drop support"""
@@ -78,6 +78,7 @@ def start_conversion(input_entry, output_entry, quality_entry, progress_bar, sta
         preview_issues([str(e)])
         send_email_notification(email_entry.get(), "Conversion Failed", f"An error occurred during the conversion: {e}")
         log_error(str(e))
+        send_error_log_to_centralized_system(str(e), "recipient@example.com")
         messagebox.showerror("Error", f"An error occurred: {e}")
 
 def send_email_notification(recipient_email, subject, body):
