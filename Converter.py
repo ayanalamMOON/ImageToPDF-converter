@@ -13,6 +13,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from error_reporter import log_error, send_error_log_to_centralized_system
+import logging
+import traceback
 
 class DragDropEntry(tk.Entry):
     """Custom Entry widget with drag and drop support"""
@@ -73,13 +75,21 @@ def start_conversion(input_entry, output_entry, quality_entry, progress_bar, sta
         retry(heic_to_pdf_with_fallback, input_folder, output_pdf, compression_quality, supported_formats, progress_bar, status_label, page_size, orientation, margins)
         send_email_notification(email_entry.get(), "Conversion Successful", f"The conversion of images in {input_folder} to {output_pdf} was successful.")
     except Exception as e:
-        log_error(str(e))
-        report_error(str(e), "recipient@example.com")
-        preview_issues([str(e)])
+        error_message = str(e)
+        function_name = "start_conversion"
+        input_params = {
+            "input_folder": input_folder,
+            "output_pdf": output_pdf,
+            "compression_quality": compression_quality,
+            "supported_formats": supported_formats
+        }
+        log_error(error_message, function_name=function_name, input_params=input_params)
+        send_error_log_to_centralized_system(error_message, "recipient@example.com")
+        report_error(error_message, "recipient@example.com")
+        preview_issues([error_message])
         send_email_notification(email_entry.get(), "Conversion Failed", f"An error occurred during the conversion: {e}")
-        log_error(str(e))
-        send_error_log_to_centralized_system(str(e), "recipient@example.com")
         messagebox.showerror("Error", f"An error occurred: {e}")
+        logging.error(f"Error in {function_name} with params {input_params}: {error_message}\n{traceback.format_exc()}")
 
 def send_email_notification(recipient_email, subject, body):
     sender_email = "your_email@example.com"
