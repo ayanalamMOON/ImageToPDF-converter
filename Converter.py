@@ -52,7 +52,7 @@ def start_conversion(
     recursive=True, min_date=None, skip_converted=True, delete_source=False,
     pdf_options=None
 ):
-    """Start the HEIC, JPEG, and PNG to PDF conversion process."""
+    """Start the HEIC, JPEG, PNG, BMP, and GIF to PDF conversion process."""
     input_folder = input_entry.get()
     output_pdf = output_entry.get()
     try:
@@ -72,7 +72,7 @@ def start_conversion(
         return
 
     # Call the function from fallback_handler
-    supported_formats = (".heic", ".jpeg", ".jpg", ".png")
+    supported_formats = (".heic", ".jpeg", ".jpg", ".png", ".bmp", ".gif")
     heic_to_pdf_with_fallback(
         input_folder, output_pdf, compression_quality, supported_formats,
         progress_bar, status_label, pdf_options=pdf_options,
@@ -111,7 +111,7 @@ def show_error_logs():
 def create_gui():
     """Create the tkinter GUI with PDF customization options."""
     root = TkinterDnD.Tk()  # Use TkinterDnD instead of regular Tk
-    root.title("HEIC, JPEG, PNG to PDF Converter")
+    root.title("HEIC, JPEG, PNG, BMP, GIF to PDF Converter")
 
     # Keyboard shortcuts
     def handle_shortcuts(event):
@@ -292,6 +292,16 @@ def create_gui():
     merge_label = tk.Label(merge_frame, text="No PDFs selected")
     merge_label.pack(side=tk.LEFT)
 
+    # Custom fonts
+    font_var = tk.StringVar()
+    tk.Label(pdf_frame, text="Font:").pack(side=tk.LEFT, padx=5)
+    ttk.Entry(pdf_frame, textvariable=font_var, width=15).pack(side=tk.LEFT, padx=5)
+
+    # Background color
+    bg_color_var = tk.StringVar()
+    tk.Label(pdf_frame, text="Background Color:").pack(side=tk.LEFT, padx=5)
+    ttk.Entry(pdf_frame, textvariable=bg_color_var, width=15).pack(side=tk.LEFT, padx=5)
+
     # Update start_conversion to use new options
     def enhanced_start_conversion():
         try:
@@ -309,7 +319,9 @@ def create_gui():
                           if size_var.get() == "Custom" else None,
             'watermark': watermark_var.get() or None,
             'page_numbers': page_numbers_var.get(),
-            'merge_files': merge_files if merge_var.get() else None
+            'merge_files': merge_files if merge_var.get() else None,
+            'font': font_var.get() or None,
+            'background_color': bg_color_var.get() or None
         }
 
         start_conversion(

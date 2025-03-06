@@ -182,10 +182,12 @@ class CustomPDF(FPDF):
     """Extended FPDF class with watermark and page numbers."""
     def __init__(
         self, orientation='P', unit='mm', format='A4',
-        watermark_text=None
+        watermark_text=None, font=None, background_color=None
     ):
         super().__init__(orientation=orientation, unit=unit, format=format)
         self.watermark_text = watermark_text
+        self.font = font
+        self.background_color = background_color
 
     def header(self):
         if self.watermark_text:
@@ -201,6 +203,14 @@ class CustomPDF(FPDF):
             self.set_font('Arial', 'I', 8)
             self.set_text_color(128)
             self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
+
+    def add_page(self, orientation='', size='', rotation=0):
+        super().add_page(orientation, size, rotation)
+        if self.background_color:
+            self.set_fill_color(*self.background_color)
+            self.rect(0, 0, self.w, self.h, 'F')
+        if self.font:
+            self.set_font(self.font)
 
 def merge_pdfs(pdf_files, output_path):
     """Merge multiple PDF files into one."""
@@ -283,7 +293,7 @@ def heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, sup
                     status_label.config(text=f"Falling back to CloudConvert for {os.path.basename(file_path)}")
                     convert_heic_to_jpeg_with_cloudconvert(file_path, output_image_path)
             else:
-                # Handle JPEG and PNG directly
+                # Handle JPEG, PNG, BMP, and GIF directly
                 image = Image.open(file_path)
                 if image.mode != "RGB":
                     image = image.convert("RGB")
@@ -301,11 +311,13 @@ def heic_to_pdf_with_fallback(input_folder, output_pdf, compression_quality, sup
         custom_size = pdf_options.get('custom_size', None)
         watermark = pdf_options.get('watermark', None)
         page_numbers = pdf_options.get('page_numbers', False)
+        font = pdf_options.get('font', None)
+        background_color = pdf_options.get('background_color', None)
         
         if page_size == 'Custom' and custom_size:
-            pdf = CustomPDF(orientation=orientation, format=custom_size, watermark_text=watermark)
+            pdf = CustomPDF(orientation=orientation, format=custom_size, watermark_text=watermark, font=font, background_color=background_color)
         else:
-            pdf = CustomPDF(orientation=orientation, format=page_size, watermark_text=watermark)
+            pdf = CustomPDF(orientation=orientation, format=page_size, watermark_text=watermark, font=font, background_color=background_color)
         
         pdf.page_numbers = page_numbers
         
