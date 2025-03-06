@@ -1,0 +1,6 @@
+Pillow
+pyheif
+fpdf
+PyPDF2
+tkinterdnd2
+requests

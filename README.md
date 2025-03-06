@@ -18,7 +18,7 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
 
 ### 🎯 Core Features
 - Convert HEIC images to PDF
-- Support for JPEG and PNG formats
+- Support for JPEG, PNG, BMP, and GIF formats
 - Adjustable compression quality
 - Simple, clean GUI interface
 
@@ -34,6 +34,8 @@ So, what did I do? I built my own solution! 💪 What started as a simple HEIC t
   - Page numbers
   - PDF compression control
   - Multi-PDF merging
+  - Custom fonts
+  - Background colors
 
 - **Professional Output**
   - Consistent formatting
